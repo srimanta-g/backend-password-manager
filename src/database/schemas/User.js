@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-
+const { generateToken } = require("../../service/authService");
 const userSchema = new Schema({
 	name: {
 		type: String,
@@ -20,7 +20,19 @@ const userSchema = new Schema({
 	phoneNumber: {
 		type: String,
 	},
+	_tokens: [
+		{
+			type: String,
+		},
+	],
 });
+
+userSchema.methods.generateTokenForUser = async function () {
+	const user = this;
+	const token = generateToken(user.username);
+	user._tokens = user._tokens.concat(token);
+	return token;
+};
 
 const userModel = model("User", userSchema);
 

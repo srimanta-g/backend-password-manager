@@ -1,4 +1,6 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
+const { userRouter } = require("./router/userRouter");
 require("dotenv").config();
 require("./database/connect");
 
@@ -11,6 +13,8 @@ const DATABASE_CONNECTION_URL = process.env.DATABASE_CONNECTION_URL;
 establishConnectionToDatabase(DATABASE_CONNECTION_URL);
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(userRouter);
 
 app.listen(PORT, () => {
 	console.log(`Server started at ${PORT}`);
