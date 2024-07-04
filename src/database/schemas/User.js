@@ -20,6 +20,7 @@ const userSchema = new Schema({
 	phoneNumber: {
 		type: String,
 	},
+	// _passwords
 	_tokens: [
 		{
 			type: String,
