@@ -1,5 +1,9 @@
 const { Router } = require("express");
-const { createNewUser, login } = require("../service/userService");
+const {
+	createNewUser,
+	login,
+	addNewPasswordToCurrentUser,
+} = require("../service/userService");
 const { verifyAuthTokenMiddleware } = require("../middleware/authMiddleware");
 
 const userRouter = Router();
@@ -29,10 +33,16 @@ userRouter.post("/users/login", async (request, response) => {
 			request.body.emailId,
 			request.body.password
 		);
-		response.cookie("token", result.token);
-		response.status(200).send({ body: result.body });
+		if (result.status !== 200) {
+			response
+				.status(result.status)
+				.send({ message: result.message });
+		} else {
+			response.cookie("token", result.token);
+			response.status(result.status).send({ body: result.body });
+		}
 	} catch (error) {
-		console.log(error);
+		console.log(error.message);
 	}
 });
 
@@ -46,6 +56,31 @@ userRouter.get(
 			response.send({
 				error: error.message,
 			});
+		}
+	}
+);
+
+userRouter.post(
+	"/users/add-new-password/:username",
+	verifyAuthTokenMiddleware,
+	async (request, response) => {
+		try {
+			const result = await addNewPasswordToCurrentUser(
+				request.params.username,
+				request.body.url,
+				request.body.password
+			);
+			if (result.status !== 200) {
+				response
+					.status(result.status)
+					.send({ error: result.message });
+			} else {
+				response.status(result.status).send({
+					body: result.body,
+				});
+			}
+		} catch (error) {
+			console.log(error.message);
 		}
 	}
 );

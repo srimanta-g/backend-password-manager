@@ -3,14 +3,21 @@ const { userModel } = require("../database/schemas/User");
 
 const createNewUser = async (user) => {
 	try {
-		const usersLists = await userModel.find({
-			emailId: user.emailId,
-		});
-
-		if (usersLists.length !== 0) {
+		const isUserPresent =
+			await userModel.isUserPresentWithEmailOrUsername(
+				user.emailId,
+				user.username
+			);
+		if (isUserPresent === 1) {
 			return {
 				status: 400,
 				message: "User already present with emailId",
+			};
+		}
+		if (isUserPresent === 2) {
+			return {
+				status: 400,
+				message: "User already present with username",
 			};
 		}
 		const newuser = new userModel({
@@ -48,7 +55,6 @@ const login = async (emailId, password) => {
 				message: "No user found with the provided email",
 			};
 		}
-		// user = user.at(0);
 		if (!bcryptjs.compareSync(password, user.password)) {
 			return {
 				status: 400,
@@ -70,9 +76,33 @@ const login = async (emailId, password) => {
 	} catch (error) {
 		return {
 			status: 500,
-			message: error.message,
+			message: "Internal server error",
 		};
 	}
 };
 
-module.exports = { createNewUser, login };
+const addNewPasswordToCurrentUser = async (username, url, password) => {
+	try {
+		const passwordObject = { url, password };
+		const user = await userModel.findOne({ username });
+		user.addNewPassword(passwordObject);
+		const savedUser = await user.save();
+		return {
+			status: 200,
+			body: {
+				name: savedUser.name,
+				username: savedUser.username,
+				emailId: savedUser.emailId,
+				phoneNumber: savedUser.phoneNumber,
+				_passwords: savedUser._passwords,
+			},
+		};
+	} catch (error) {
+		return {
+			status: 500,
+			message: "Internal server error",
+		};
+	}
+};
+
+module.exports = { createNewUser, login, addNewPasswordToCurrentUser };

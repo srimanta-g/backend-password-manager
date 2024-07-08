@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { generateToken } = require("../../service/authService");
+const { passwordSchema } = require("./Password");
 const userSchema = new Schema({
 	name: {
 		type: String,
@@ -20,10 +21,12 @@ const userSchema = new Schema({
 	phoneNumber: {
 		type: String,
 	},
-	// _passwords
+	_passwords: [passwordSchema],
 	_tokens: [
 		{
-			type: String,
+			token: {
+				type: String,
+			},
 		},
 	],
 });
@@ -31,8 +34,25 @@ const userSchema = new Schema({
 userSchema.methods.generateTokenForUser = async function () {
 	const user = this;
 	const token = generateToken(user.username);
-	user._tokens = user._tokens.concat(token);
+	user._tokens = user._tokens.concat({ token });
 	return token;
+};
+
+userSchema.methods.addNewPassword = function (password) {
+	const user = this;
+	user._passwords = user._passwords.concat(password);
+};
+
+userSchema.statics.isUserPresentWithEmailOrUsername = async function (
+	emailId,
+	username
+) {
+	let user = await this.findOne({ emailId });
+	if (user) return 1;
+	user = await this.findOne({ username });
+	if (user) return 2;
+
+	return 0;
 };
 
 const userModel = model("User", userSchema);

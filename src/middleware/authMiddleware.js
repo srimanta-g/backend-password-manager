@@ -1,3 +1,4 @@
+const { userModel } = require("../database/schemas/User");
 const { decodeToken } = require("../service/authService");
 
 const verifyAuthTokenMiddleware = async (request, response, next) => {
@@ -5,14 +6,19 @@ const verifyAuthTokenMiddleware = async (request, response, next) => {
 	try {
 		const token = request.cookies.token;
 		const decodedUsername = decodeToken(token);
-		if (username !== decodedUsername || token === undefined) {
-			response.status(403).send({
-				status: 403,
-				message: "Authentication Failed",
-			});
+		const user = await userModel.findOne({
+			username,
+			"_tokens.token": token,
+		});
+		if (
+			username !== decodedUsername ||
+			token === undefined ||
+			user === null
+		) {
+			throw "Authentication Error";
 		}
 	} catch (error) {
-		throw new Error(error.message);
+		response.status(403).send({ message: error });
 	}
 	next();
 };
