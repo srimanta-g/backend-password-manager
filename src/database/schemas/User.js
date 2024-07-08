@@ -38,9 +38,23 @@ userSchema.methods.generateTokenForUser = async function () {
 	return token;
 };
 
+userSchema.methods.deleteToken = async function (tokenWithUser) {
+	const user = this;
+	user._tokens = user._tokens.filter(
+		(token) => token.token !== tokenWithUser
+	);
+};
+
 userSchema.methods.addNewPassword = function (password) {
 	const user = this;
 	user._passwords = user._passwords.concat(password);
+};
+
+userSchema.methods.deletePassword = function (passwordId) {
+	const user = this;
+	user._passwords = user._passwords.filter(
+		(password) => password._id.toString() !== passwordId
+	);
 };
 
 userSchema.statics.isUserPresentWithEmailOrUsername = async function (

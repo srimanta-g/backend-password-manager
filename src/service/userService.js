@@ -76,7 +76,7 @@ const login = async (emailId, password) => {
 	} catch (error) {
 		return {
 			status: 500,
-			message: "Internal server error",
+			message: error.message,
 		};
 	}
 };
@@ -100,9 +100,51 @@ const addNewPasswordToCurrentUser = async (username, url, password) => {
 	} catch (error) {
 		return {
 			status: 500,
-			message: "Internal server error",
+			message: error.message,
 		};
 	}
 };
 
-module.exports = { createNewUser, login, addNewPasswordToCurrentUser };
+const deletePasswordFromUser = async (username, passwordId) => {
+	try {
+		const user = await userModel.findOne({ username });
+		user.deletePassword(passwordId);
+		const savedUser = await user.save();
+		return {
+			status: 200,
+			body: {
+				name: savedUser.name,
+				username: savedUser.username,
+				emailId: savedUser.emailId,
+				phoneNumber: savedUser.phoneNumber,
+				_passwords: savedUser._passwords,
+			},
+		};
+	} catch (error) {
+		return {
+			status: 500,
+			message: error.message,
+		};
+	}
+};
+
+const logout = async (username, token) => {
+	try {
+		const user = await userModel.findOne({ username });
+		user.deleteToken(token);
+		await user.save();
+	} catch (error) {
+		return {
+			status: 500,
+			message: error.message,
+		};
+	}
+};
+
+module.exports = {
+	createNewUser,
+	login,
+	addNewPasswordToCurrentUser,
+	deletePasswordFromUser,
+	logout,
+};

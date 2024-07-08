@@ -3,6 +3,8 @@ const {
 	createNewUser,
 	login,
 	addNewPasswordToCurrentUser,
+	deletePasswordFromUser,
+	logout,
 } = require("../service/userService");
 const { verifyAuthTokenMiddleware } = require("../middleware/authMiddleware");
 
@@ -79,6 +81,47 @@ userRouter.post(
 					body: result.body,
 				});
 			}
+		} catch (error) {
+			console.log(error.message);
+		}
+	}
+);
+
+userRouter.delete(
+	"/users/delete-password/:username/:passwordId",
+	verifyAuthTokenMiddleware,
+	async (request, response) => {
+		try {
+			const result = await deletePasswordFromUser(
+				request.params.username,
+				request.params.passwordId
+			);
+			if (result.status !== 200) {
+				response
+					.status(result.status)
+					.send({ error: result.message });
+			} else {
+				response.status(result.status).send({
+					body: result.body,
+				});
+			}
+		} catch (error) {
+			console.log(error.message);
+		}
+	}
+);
+
+userRouter.post(
+	"/users/:username/log-out",
+	verifyAuthTokenMiddleware,
+	async (request, response) => {
+		try {
+			const username = request.params.username;
+			const token = request.cookies.token;
+			await logout(username, token);
+			return response
+				.status(200)
+				.send({ message: "User Successfully Logged Out" });
 		} catch (error) {
 			console.log(error.message);
 		}

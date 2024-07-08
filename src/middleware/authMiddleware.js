@@ -18,7 +18,7 @@ const verifyAuthTokenMiddleware = async (request, response, next) => {
 			throw "Authentication Error";
 		}
 	} catch (error) {
-		response.status(403).send({ message: error });
+		return response.status(403).send({ message: error });
 	}
 	next();
 };
