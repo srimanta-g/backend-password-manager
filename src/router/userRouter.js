@@ -14,10 +14,13 @@ userRouter.post("/users/signup", async (request, response) => {
 	try {
 		const result = await createNewUser(request.body);
 		if (result.status === 201) {
+			response.header("Access-Control-Allow-Origin", "*");
 			response.status(201).send(result);
 		} else if (result.status === 400) {
+			response.header("Access-Control-Allow-Origin", "*");
 			response.status(400).send(result);
 		} else {
+			response.header("Access-Control-Allow-Origin", "*");
 			response.status(500).send({
 				status: 500,
 				message: "Something went wrong........",
