@@ -15,7 +15,7 @@ const DATABASE_CONNECTION_URL = process.env.DATABASE_CONNECTION_URL;
 establishConnectionToDatabase(DATABASE_CONNECTION_URL);
 
 app.use(express.json());
-app.use(cors({ credentials: true, origin: "*", withCredentials: true }));
+app.use(cors({ credentials: true, origin: false, withCredentials: true }));
 app.use(cookieParser());
 app.use(userRouter);
 
