@@ -84,9 +84,11 @@ const login = async (emailId, password) => {
 const addNewPasswordToCurrentUser = async (username, url, password) => {
 	try {
 		const passwordObject = { url, password };
+		// console.log(passwordObject);
 		const user = await userModel.findOne({ username });
 		user.addNewPassword(passwordObject);
 		const savedUser = await user.save();
+		// console.log(savedUser);
 		return {
 			status: 200,
 			body: {
@@ -141,10 +143,27 @@ const logout = async (username, token) => {
 	}
 };
 
+const getAllPasswordsOfUser = async (username) => {
+	try {
+		const user = await userModel.findOne({ username });
+		return {
+			status: 200,
+			data: user._passwords,
+		};
+		// console.log(user._passwords);
+	} catch (error) {
+		return {
+			status: 500,
+			message: error.message,
+		};
+	}
+};
+
 module.exports = {
 	createNewUser,
 	login,
 	addNewPasswordToCurrentUser,
 	deletePasswordFromUser,
 	logout,
+	getAllPasswordsOfUser,
 };

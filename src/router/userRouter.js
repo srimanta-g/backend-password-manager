@@ -5,6 +5,7 @@ const {
 	addNewPasswordToCurrentUser,
 	deletePasswordFromUser,
 	logout,
+	getAllPasswordsOfUser,
 } = require("../service/userService");
 const { verifyAuthTokenMiddleware } = require("../middleware/authMiddleware");
 
@@ -14,13 +15,13 @@ userRouter.post("/users/signup", async (request, response) => {
 	try {
 		const result = await createNewUser(request.body);
 		if (result.status === 201) {
-			response.header("Access-Control-Allow-Origin", "*");
+			// response.header("Access-Control-Allow-Origin", "*");
 			response.status(201).send(result);
 		} else if (result.status === 400) {
-			response.header("Access-Control-Allow-Origin", "*");
+			// response.header("Access-Control-Allow-Origin", "*");
 			response.status(400).send(result);
 		} else {
-			response.header("Access-Control-Allow-Origin", "*");
+			// response.header("Access-Control-Allow-Origin", "*");
 			response.status(500).send({
 				status: 500,
 				message: "Something went wrong........",
@@ -43,7 +44,10 @@ userRouter.post("/users/login", async (request, response) => {
 				.status(result.status)
 				.send({ message: result.message });
 		} else {
-			response.cookie("token", result.token);
+			response.cookie("token", result.token, {
+				sameSite: "none",
+				secure: true,
+			});
 			response.status(result.status).send({ body: result.body });
 		}
 	} catch (error) {
@@ -125,6 +129,26 @@ userRouter.post(
 			return response
 				.status(200)
 				.send({ message: "User Successfully Logged Out" });
+		} catch (error) {
+			console.log(error.message);
+		}
+	}
+);
+
+userRouter.get(
+	"/users/:username/get-passwords",
+	verifyAuthTokenMiddleware,
+	async (request, response) => {
+		const username = request.params.username;
+		const result = await getAllPasswordsOfUser(username);
+		// console.log(passwords.data);
+		if (result.status !== 200) {
+			return response
+				.status(result.status)
+				.status({ message: "Internal sever error" });
+		}
+		response.status(result.status).send({ data: result.data });
+		try {
 		} catch (error) {
 			console.log(error.message);
 		}
