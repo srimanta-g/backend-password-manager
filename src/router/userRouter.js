@@ -48,6 +48,7 @@ userRouter.post("/users/login", async (request, response) => {
 				sameSite: "none",
 				secure: true,
 			});
+			response.header("Access-Control-Allow-Origin", "*");
 			response.status(result.status).send({ body: result.body });
 		}
 	} catch (error) {
